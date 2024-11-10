@@ -31,8 +31,7 @@ const scrollPage: ToolConfig = {
     console.log(
       `User / Agent ${agentInfo.id} requested to scroll ${direction}`
     );
-
-    const url = `https://browser-control-hacksc.onrender.com/scroll/${direction}`;
+    const url = `https://browser-control-hacksc.onrender.com/scroll?action=scroll&direction=${direction}`;
     try {
       const response = await axios.post(url);
       return {
@@ -81,7 +80,7 @@ const findAndClickButton: ToolConfig = {
     console.log(`User / Agent ${agentInfo.id} requested to click button at coordinates: (${x}, ${y})`);
 
     try {
-      const clickUrl = `https://browser-control-hacksc.onrender.com/click/${x}/${y}`;
+      const clickUrl = `https://browser-control-hacksc.onrender.com/click?action=click&x=${x}&y=${y}`;
       await axios.post(clickUrl);
 
       return {
@@ -105,3 +104,22 @@ const findAndClickButton: ToolConfig = {
     }
   },
 };
+
+const dainService = defineDAINService({
+  metadata: {
+    title: "Weather DAIN Service",
+    description:
+      "A DAIN service for current weather and forecasts using Open-Meteo API",
+    version: "1.0.0",
+    author: "Your Name",
+    tags: ["weather", "forecast", "dain"],
+  },
+  identity: {
+    apiKey: process.env.DAIN_API_KEY,
+  },
+  tools: [scrollPage, findAndClickButton],
+});
+
+dainService.startNode({ port: 2022 }).then(() => {
+  console.log("Weather DAIN Service is running on port 2022");
+});
