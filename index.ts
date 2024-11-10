@@ -1,5 +1,3 @@
-//File: example/example-node.ts
-
 import { z } from "zod";
 import axios from "axios";
 
@@ -11,111 +9,99 @@ import {
   ServiceContext,
 } from "@dainprotocol/service-sdk";
 
-const getWeatherConfig: ToolConfig = {
-  id: "get-weather",
-  name: "Get Weather",
-  description: "Fetches current weather for a city",
+const scrollPage: ToolConfig = {
+  id: "scrollPage",
+  name: "Scroll Page",
+  description: 
+    "Send a request to an API to make it scroll up or down a page. \
+    Use this when the user tells you to scroll up or down.",
   input: z
     .object({
-      latitude: z.number().describe("Latitude coordinate"),
-      longitude: z.number().describe("Longitude coordinate"),
+      direction: z.enum(["up", "down"]).describe("Direction to scroll the page"),
     })
-    .describe("Input parameters for the weather request"),
+    .describe("Input parameters for the scroll request"),
   output: z
     .object({
-      temperature: z.number().describe("Current temperature in Celsius"),
-      windSpeed: z.number().describe("Current wind speed in km/h"),
+      success: z.boolean().describe("Indicates if the scroll action was successful"),
+      message: z.string().describe("Details about the scroll action"),
     })
-    .describe("Current weather information"),
+    .describe("Scroll action response"),
   pricing: { pricePerUse: 0, currency: "USD" },
-  handler: async ({ latitude, longitude }, agentInfo) => {
+  handler: async ({ direction }, agentInfo) => {
     console.log(
-      `User / Agent ${agentInfo.id} requested weather at ${latitude},${longitude}`
+      `User / Agent ${agentInfo.id} requested to scroll ${direction}`
     );
 
-    const response = await axios.get(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m`
-    );
-
-    const { temperature_2m, wind_speed_10m } = response.data.current;
-
-    return {
-      text: `The current temperature is ${temperature_2m}°C with wind speed of ${wind_speed_10m} km/h`,
-      data: {
-        temperature: temperature_2m,
-        windSpeed: wind_speed_10m,
-      },
-      ui: {},
-    };
+    const url = `https://browser-control-hacksc.onrender.com/scroll/${direction}`;
+    try {
+      const response = await axios.post(url);
+      return {
+        text: `Scrolled ${direction} successfully.`,
+        data: {
+          success: true,
+          message: response.data.message || `Scrolled ${direction} successfully.`,
+        },
+        ui: {},
+      };
+    } catch (error) {
+      console.error(`Error scrolling ${direction}:`, error);
+      return {
+        text: `Failed to scroll ${direction}.`,
+        data: {
+          success: false,
+          message: error.message || `Failed to scroll ${direction}.`,
+        },
+        ui: {},
+      };
+    }
   },
 };
 
-const getWeatherForecastConfig: ToolConfig = {
-  id: "get-weather-forecast",
-  name: "Get Weather Forecast",
-  description: "Fetches hourly weather forecast",
+const findAndClickButton: ToolConfig = {
+  id: "findAndClickButton",
+  name: "Find and Click Button",
+  description:
+    "Takes a screenshot, analyzes it to find a button matching the user's description, \
+    and sends x and y coordinates of the button to the API to make it click the button. \
+    Use this when the user tells you to click on a specific button on the web page.",
   input: z
     .object({
-      latitude: z.number().describe("Latitude coordinate"),
-      longitude: z.number().describe("Longitude coordinate"),
+      x: z.number().describe("Middle point of the button in x coordinate"),
+      y: z.number().describe("Middle point of the button in y coordinate"),
     })
-    .describe("Input parameters for the forecast request"),
+    .describe("Input parameters to describe the button"),
   output: z
     .object({
-      times: z.array(z.string()).describe("Forecast times"),
-      temperatures: z
-        .array(z.number())
-        .describe("Temperature forecasts in Celsius"),
-      windSpeeds: z.array(z.number()).describe("Wind speed forecasts in km/h"),
-      humidity: z
-        .array(z.number())
-        .describe("Relative humidity forecasts in %"),
+      success: z.boolean().describe("Indicates if the click action was successful"),
+      message: z.string().describe("Details about the click action"),
     })
-    .describe("Hourly weather forecast"),
+    .describe("Button click response"),
   pricing: { pricePerUse: 0, currency: "USD" },
-  handler: async ({ latitude, longitude }, agentInfo) => {
-    console.log(
-      `User / Agent ${agentInfo.id} requested forecast at ${latitude},${longitude}`
-    );
+  handler: async ({ x, y }, agentInfo) => {
+    console.log(`User / Agent ${agentInfo.id} requested to click button at coordinates: (${x}, ${y})`);
 
-    const response = await axios.get(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
-    );
+    try {
+      const clickUrl = `https://browser-control-hacksc.onrender.com/click/${x}/${y}`;
+      await axios.post(clickUrl);
 
-    const { time, temperature_2m, wind_speed_10m, relative_humidity_2m } =
-      response.data.hourly;
-
-    return {
-      text: `Weather forecast available for the next ${time.length} hours`,
-      data: {
-        times: time,
-        temperatures: temperature_2m,
-        windSpeeds: wind_speed_10m,
-        humidity: relative_humidity_2m,
-      },
-      ui: {},
-    };
+      return {
+        text: `Clicked button successfully at (${x}, ${y}).`,
+        data: {
+          success: true,
+          message: `Button clicked successfully.`,
+        },
+        ui: {},
+      };
+    } catch (error) {
+      console.error("Error clicking button:", error);
+      return {
+        text: `Failed to click button at (${x}, ${y}).`,
+        data: {
+          success: false,
+          message: error.message || "Unknown error occurred.",
+        },
+        ui: {},
+      };
+    }
   },
 };
-
-
-
-const dainService = defineDAINService({
-  metadata: {
-    title: "Weather DAIN Service",
-    description:
-      "A DAIN service for current weather and forecasts using Open-Meteo API",
-    version: "1.0.0",
-    author: "Your Name",
-    tags: ["weather", "forecast", "dain"],
-    logo: "https://cdn-icons-png.flaticon.com/512/252/252035.png"
-  },
-  identity: {
-    apiKey: process.env.DAIN_API_KEY,
-  },
-  tools: [getWeatherConfig, getWeatherForecastConfig],
-});
-
-dainService.startNode({ port: 2022 }).then(() => {
-  console.log("Weather DAIN Service is running on port 2022");
-});
