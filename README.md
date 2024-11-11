@@ -6,6 +6,10 @@
 
 ---
 
+## 1st Place Winners of the DAIN Hackathon at USC 🎉
+
+![winners](https://github.com/user-attachments/assets/939870a6-f167-4a11-aabb-c2a831c50343)
+
 ## 📖 About DAIN's Software
 
 **DAIN** is a leading AI company dedicated to creating a Large Language Model (LLM) with a diverse range of features to cater to various user needs. DAIN’s platform enables both clients and developers to utilize and extend its functionalities:
