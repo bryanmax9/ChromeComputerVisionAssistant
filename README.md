@@ -48,7 +48,7 @@ Each method was tested to determine which approach provided the most efficient u
 Our tech stack included a combination of web and backend technologies, as well as DAIN’s platform-specific tools:
 
 - **Chrome Extension Development**: Built with **JavaScript, HTML, and SCSS** to enable a user-friendly, voice-activated web browsing experience.
-- **Backend (API Development)**: Developed using **Flask** in Python to handle communication between DAIN’s feature and the operating system for executing commands.
+- **Backend (API Integration)**: Developed using **pyshell** in JavaScript to enable direct communication between DAIN’s feature and the operating system for executing commands.
 - **System Control with AST Library**: Used **Python** and the **AST NPL** library to control OS-level actions directly, including mouse movements and scroll functions.
 - **DAIN Platform Integration**: DAIN’s platform primarily runs on **TypeScript**. Our team had limited access to the core codebase and was able to add features but not alter DAIN’s main code.
 
@@ -56,7 +56,7 @@ Our tech stack included a combination of web and backend technologies, as well a
 
 - **JavaScript**: For frontend Chrome extension development.
 - **HTML & SCSS**: To design and style the Chrome extension interface.
-- **Python (Flask)**: For backend API to interface with the OS commands.
+- **pyshell:**: Used in JavaScript to interface with Python commands for controlling the OS.
 - **AST NPL Library**: A Python library that enables system-level control for executing commands like scrolling and clicking.
 - **TypeScript**: Used in DAIN’s software ecosystem, which we worked with to extend, though with limited modification permissions.
 
